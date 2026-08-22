@@ -61,7 +61,10 @@ function SupplierForm({
   });
 
   const save = () => {
-    if (!f.name.trim()) return toast.error("Enter the company name");
+    if (!f.name.trim()) {
+      toast.error("Enter the company name");
+      return;
+    }
     if (existing) {
       updateSupplier(existing.id, f);
       toast.success("Company updated");

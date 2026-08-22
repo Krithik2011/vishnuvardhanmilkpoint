@@ -225,7 +225,7 @@ function Box({
 }: {
   label: string;
   value: string;
-  tone?: "primary" | "warn";
+  tone?: "primary" | "warn" | undefined;
 }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">

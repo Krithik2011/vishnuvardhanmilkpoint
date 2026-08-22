@@ -80,8 +80,14 @@ export function ProductForm({
   }, [open]);
 
   const save = () => {
-    if (!f.name.trim()) return toast.error("Enter the product name");
-    if (!f.supplierId) return toast.error("Choose the company first");
+    if (!f.name.trim()) {
+      toast.error("Enter the product name");
+      return;
+    }
+    if (!f.supplierId) {
+      toast.error("Choose the company first");
+      return;
+    }
     if (existing) {
       updateProduct(existing.id, f);
       toast.success("Product updated");

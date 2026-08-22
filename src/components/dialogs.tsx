@@ -44,7 +44,10 @@ export function AddCustomerDialog({ trigger }: { trigger: React.ReactNode }) {
   const [f, setF] = React.useState({ name: "", phone: "", address: "", note: "" });
 
   const save = () => {
-    if (!f.name.trim()) return toast.error("Please enter the customer name");
+    if (!f.name.trim()) {
+      toast.error("Please enter the customer name");
+      return;
+    }
     addCustomer(f);
     toast.success(`${f.name} added`);
     setF({ name: "", phone: "", address: "", note: "" });
@@ -135,9 +138,15 @@ export function DeliveryDialog({
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
 
   const save = () => {
-    if (!cust) return toast.error("Please choose a customer");
+    if (!cust) {
+      toast.error("Please choose a customer");
+      return;
+    }
     const valid = items.filter((i) => i.qty > 0);
-    if (!valid.length) return toast.error("Add at least one product");
+    if (!valid.length) {
+      toast.error("Add at least one product");
+      return;
+    }
     addDelivery({ date, customerId: cust, items: valid });
     toast.success(`Delivery saved — ${rupees(total)} added to balance`);
     setOpen(false);
@@ -223,9 +232,15 @@ export function StockDialog({ trigger }: { trigger: React.ReactNode }) {
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
 
   const save = () => {
-    if (!supplier) return toast.error("Please choose the company / supplier");
+    if (!supplier) {
+      toast.error("Please choose the company / supplier");
+      return;
+    }
     const valid = items.filter((i) => i.qty > 0);
-    if (!valid.length) return toast.error("Add at least one product");
+    if (!valid.length) {
+      toast.error("Add at least one product");
+      return;
+    }
     addStockEntry({
       date,
       supplier,
@@ -317,9 +332,15 @@ export function PaymentDialog({
   const amt = Number(amount) || 0;
 
   const save = () => {
-    if (!cust) return toast.error("Please choose a customer");
-    if (amt <= 0) return toast.error("Enter the amount received");
-    addPayment({ date, customerId: cust, amount: amt, mode, note: note || undefined });
+    if (!cust) {
+      toast.error("Please choose a customer");
+      return;
+    }
+    if (amt <= 0) {
+      toast.error("Enter the amount received");
+      return;
+    }
+    addPayment({ date, customerId: cust, amount: amt, mode, ...(note ? { note } : {}) });
     const left = due - amt;
     toast.success(
       left > 0

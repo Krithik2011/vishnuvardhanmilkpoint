@@ -4,7 +4,7 @@ export type Supplier = {
   id: string;
   name: string;
   phone: string;
-  note?: string;
+  note?: string | undefined;
 };
 
 export type Product = {
@@ -23,7 +23,7 @@ export type Customer = {
   name: string;
   phone: string;
   address: string;
-  note?: string;
+  note?: string | undefined;
 };
 
 export type StockEntry = {
@@ -46,7 +46,7 @@ export type Payment = {
   customerId: string;
   amount: number;
   mode: "Cash" | "UPI" | "Bank";
-  note?: string;
+  note?: string | undefined;
 };
 
 export type DB = {
@@ -95,14 +95,14 @@ function seed(): DB {
   ): Product => ({ id: uid(), supplierId, name, unit, buyPrice, salePrice, stock, lowStockAt });
 
   const products: Product[] = [
-    p(suppliers[0].id, "Taaza Toned Milk", "500 ml packet", 25, 28, 120, 40),
-    p(suppliers[0].id, "Gold Full Cream Milk", "500 ml packet", 32, 35, 18, 30),
-    p(suppliers[0].id, "Butter", "100 g", 54, 60, 24, 10),
-    p(suppliers[1].id, "Toned Milk", "500 ml packet", 23, 26, 200, 50),
-    p(suppliers[1].id, "Curd", "500 g cup", 28, 32, 12, 20),
-    p(suppliers[2].id, "Cow Milk", "500 ml packet", 26, 30, 90, 40),
-    p(suppliers[2].id, "Paneer", "200 g", 88, 100, 8, 6),
-    p(suppliers[3].id, "Buttermilk", "200 ml pouch", 8, 10, 150, 50),
+    p(suppliers[0]!.id, "Taaza Toned Milk", "500 ml packet", 25, 28, 120, 40),
+    p(suppliers[0]!.id, "Gold Full Cream Milk", "500 ml packet", 32, 35, 18, 30),
+    p(suppliers[0]!.id, "Butter", "100 g", 54, 60, 24, 10),
+    p(suppliers[1]!.id, "Toned Milk", "500 ml packet", 23, 26, 200, 50),
+    p(suppliers[1]!.id, "Curd", "500 g cup", 28, 32, 12, 20),
+    p(suppliers[2]!.id, "Cow Milk", "500 ml packet", 26, 30, 90, 40),
+    p(suppliers[2]!.id, "Paneer", "200 g", 88, 100, 8, 6),
+    p(suppliers[3]!.id, "Buttermilk", "200 ml pouch", 8, 10, 150, 50),
   ];
 
   const c = (name: string, phone: string, address: string, note?: string): Customer => ({
@@ -127,8 +127,8 @@ function seed(): DB {
       date: daysAgo(2),
       supplier: "Amul Depot",
       items: [
-        { productId: products[0].id, qty: 100, cost: 25 },
-        { productId: products[1].id, qty: 40, cost: 32 },
+        { productId: products[0]!.id, qty: 100, cost: 25 },
+        { productId: products[1]!.id, qty: 40, cost: 32 },
       ],
     },
     {
@@ -136,8 +136,8 @@ function seed(): DB {
       date: daysAgo(1),
       supplier: "Vijaya Dairy Agency",
       items: [
-        { productId: products[3].id, qty: 150, cost: 23 },
-        { productId: products[4].id, qty: 30, cost: 28 },
+        { productId: products[3]!.id, qty: 150, cost: 23 },
+        { productId: products[4]!.id, qty: 30, cost: 28 },
       ],
     },
     {
@@ -145,8 +145,8 @@ function seed(): DB {
       date: todayISO(),
       supplier: "Heritage Distributor",
       items: [
-        { productId: products[5].id, qty: 80, cost: 26 },
-        { productId: products[6].id, qty: 10, cost: 88 },
+        { productId: products[5]!.id, qty: 80, cost: 26 },
+        { productId: products[6]!.id, qty: 10, cost: 88 },
       ],
     },
   ];
@@ -159,30 +159,30 @@ function seed(): DB {
   });
 
   const deliveries: Delivery[] = [
-    d(daysAgo(3), customers[0].id, [
-      { productId: products[0].id, qty: 30, price: 28 },
-      { productId: products[3].id, qty: 20, price: 26 },
+    d(daysAgo(3), customers[0]!.id, [
+      { productId: products[0]!.id, qty: 30, price: 28 },
+      { productId: products[3]!.id, qty: 20, price: 26 },
     ]),
-    d(daysAgo(2), customers[1].id, [
-      { productId: products[4].id, qty: 10, price: 32 },
-      { productId: products[7].id, qty: 25, price: 10 },
+    d(daysAgo(2), customers[1]!.id, [
+      { productId: products[4]!.id, qty: 10, price: 32 },
+      { productId: products[7]!.id, qty: 25, price: 10 },
     ]),
-    d(daysAgo(1), customers[2].id, [{ productId: products[5].id, qty: 6, price: 30 }]),
-    d(daysAgo(1), customers[3].id, [
-      { productId: products[0].id, qty: 40, price: 28 },
-      { productId: products[2].id, qty: 5, price: 60 },
+    d(daysAgo(1), customers[2]!.id, [{ productId: products[5]!.id, qty: 6, price: 30 }]),
+    d(daysAgo(1), customers[3]!.id, [
+      { productId: products[0]!.id, qty: 40, price: 28 },
+      { productId: products[2]!.id, qty: 5, price: 60 },
     ]),
-    d(todayISO(), customers[0].id, [{ productId: products[0].id, qty: 25, price: 28 }]),
-    d(todayISO(), customers[4].id, [
-      { productId: products[3].id, qty: 30, price: 26 },
-      { productId: products[6].id, qty: 2, price: 100 },
+    d(todayISO(), customers[0]!.id, [{ productId: products[0]!.id, qty: 25, price: 28 }]),
+    d(todayISO(), customers[4]!.id, [
+      { productId: products[3]!.id, qty: 30, price: 26 },
+      { productId: products[6]!.id, qty: 2, price: 100 },
     ]),
   ];
 
   const payments: Payment[] = [
-    { id: uid(), date: daysAgo(2), customerId: customers[0].id, amount: 1000, mode: "UPI" },
-    { id: uid(), date: daysAgo(1), customerId: customers[1].id, amount: 570, mode: "Cash" },
-    { id: uid(), date: todayISO(), customerId: customers[3].id, amount: 800, mode: "Cash" },
+    { id: uid(), date: daysAgo(2), customerId: customers[0]!.id, amount: 1000, mode: "UPI" },
+    { id: uid(), date: daysAgo(1), customerId: customers[1]!.id, amount: 570, mode: "Cash" },
+    { id: uid(), date: todayISO(), customerId: customers[3]!.id, amount: 800, mode: "Cash" },
   ];
 
   return { suppliers, products, customers, stockEntries, deliveries, payments };
