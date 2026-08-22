@@ -188,15 +188,21 @@ function seed(): DB {
   return { suppliers, products, customers, stockEntries, deliveries, payments };
 }
 
+const EMPTY_DB: DB = {
+  suppliers: [],
+  products: [],
+  customers: [],
+  stockEntries: [],
+  deliveries: [],
+  payments: [],
+};
+
 let db: DB | null = null;
 const listeners = new Set<() => void>();
 
 function load(): DB {
   if (db) return db;
-  if (typeof window === "undefined") {
-    db = seed();
-    return db;
-  }
+  if (typeof window === "undefined") return EMPTY_DB;
   try {
     const raw = window.localStorage.getItem(KEY);
     db = raw ? (JSON.parse(raw) as DB) : seed();
@@ -232,7 +238,7 @@ export function useDB(): DB {
   return React.useSyncExternalStore(
     subscribe,
     () => load(),
-    () => load(),
+    () => EMPTY_DB,
   );
 }
 
