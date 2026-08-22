@@ -1,8 +1,15 @@
 import * as React from "react";
 
+export type Supplier = {
+  id: string;
+  name: string;
+  phone: string;
+  note?: string;
+};
+
 export type Product = {
   id: string;
-  brand: string;
+  supplierId: string;
   name: string;
   unit: string; // e.g. "500 ml packet", "1 L packet", "1 kg"
   buyPrice: number;
@@ -43,6 +50,7 @@ export type Payment = {
 };
 
 export type DB = {
+  suppliers: Supplier[];
   products: Product[];
   customers: Customer[];
   stockEntries: StockEntry[];
@@ -62,25 +70,39 @@ const daysAgo = (n: number) => {
 };
 
 function seed(): DB {
+  const sup = (name: string, phone: string, note?: string): Supplier => ({
+    id: uid(),
+    name,
+    phone,
+    note,
+  });
+
+  const suppliers: Supplier[] = [
+    sup("Amul", "1800 258 3333", "Depot pickup at 5:00 AM"),
+    sup("Vijaya (Telangana)", "040 2331 2233", "Govt. dairy agency"),
+    sup("Heritage", "98480 55667", "Delivered to shop"),
+    sup("Dodla", "90300 12345"),
+  ];
+
   const p = (
-    brand: string,
+    supplierId: string,
     name: string,
     unit: string,
     buyPrice: number,
     salePrice: number,
     stock: number,
     lowStockAt: number,
-  ): Product => ({ id: uid(), brand, name, unit, buyPrice, salePrice, stock, lowStockAt });
+  ): Product => ({ id: uid(), supplierId, name, unit, buyPrice, salePrice, stock, lowStockAt });
 
   const products: Product[] = [
-    p("Amul", "Taaza Toned Milk", "500 ml packet", 25, 28, 120, 40),
-    p("Amul", "Gold Full Cream Milk", "500 ml packet", 32, 35, 18, 30),
-    p("Amul", "Butter", "100 g", 54, 60, 24, 10),
-    p("Vijaya (Telangana)", "Toned Milk", "500 ml packet", 23, 26, 200, 50),
-    p("Vijaya (Telangana)", "Curd", "500 g cup", 28, 32, 12, 20),
-    p("Heritage", "Cow Milk", "500 ml packet", 26, 30, 90, 40),
-    p("Heritage", "Paneer", "200 g", 88, 100, 8, 6),
-    p("Dodla", "Buttermilk", "200 ml pouch", 8, 10, 150, 50),
+    p(suppliers[0].id, "Taaza Toned Milk", "500 ml packet", 25, 28, 120, 40),
+    p(suppliers[0].id, "Gold Full Cream Milk", "500 ml packet", 32, 35, 18, 30),
+    p(suppliers[0].id, "Butter", "100 g", 54, 60, 24, 10),
+    p(suppliers[1].id, "Toned Milk", "500 ml packet", 23, 26, 200, 50),
+    p(suppliers[1].id, "Curd", "500 g cup", 28, 32, 12, 20),
+    p(suppliers[2].id, "Cow Milk", "500 ml packet", 26, 30, 90, 40),
+    p(suppliers[2].id, "Paneer", "200 g", 88, 100, 8, 6),
+    p(suppliers[3].id, "Buttermilk", "200 ml pouch", 8, 10, 150, 50),
   ];
 
   const c = (name: string, phone: string, address: string, note?: string): Customer => ({
@@ -163,7 +185,7 @@ function seed(): DB {
     { id: uid(), date: todayISO(), customerId: customers[3].id, amount: 800, mode: "Cash" },
   ];
 
-  return { products, customers, stockEntries, deliveries, payments };
+  return { suppliers, products, customers, stockEntries, deliveries, payments };
 }
 
 let db: DB | null = null;
@@ -242,7 +264,12 @@ export function balanceOf(d: DB, customerId: string) {
 
 export function productLabel(d: DB, id: string) {
   const p = d.products.find((x) => x.id === id);
-  return p ? `${p.brand} ${p.name} (${p.unit})` : "Unknown product";
+  if (!p) return "Unknown product";
+  return `${brandOf(d, p.supplierId)} ${p.name} (${p.unit})`;
+}
+
+export function brandOf(d: DB, supplierId: string) {
+  return d.suppliers.find((s) => s.id === supplierId)?.name ?? "Other";
 }
 
 export function customerName(d: DB, id: string) {
@@ -265,6 +292,21 @@ export const deleteCustomer = (id: string) =>
     d.customers = d.customers.filter((c) => c.id !== id);
     d.deliveries = d.deliveries.filter((x) => x.customerId !== id);
     d.payments = d.payments.filter((x) => x.customerId !== id);
+  });
+
+export const addSupplier = (s: Omit<Supplier, "id">) =>
+  update((d) => void d.suppliers.push({ ...s, id: uid() }));
+
+export const updateSupplier = (id: string, s: Omit<Supplier, "id">) =>
+  update((d) => {
+    const i = d.suppliers.findIndex((x) => x.id === id);
+    if (i >= 0) d.suppliers[i] = { ...s, id };
+  });
+
+export const deleteSupplier = (id: string) =>
+  update((d) => {
+    d.suppliers = d.suppliers.filter((s) => s.id !== id);
+    d.products = d.products.filter((p) => p.supplierId !== id);
   });
 
 export const addProduct = (p: Omit<Product, "id">) =>
