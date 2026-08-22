@@ -19,6 +19,7 @@ export function ItemPicker({
   onChange,
   priceLabel,
   priceOf,
+  labelOf,
   showStock,
 }: {
   products: Product[];
@@ -26,6 +27,7 @@ export function ItemPicker({
   onChange: (items: LineItem[]) => void;
   priceLabel: string;
   priceOf: (p: Product) => number;
+  labelOf: (p: Product) => string;
   showStock?: boolean;
 }) {
   const set = (i: number, patch: Partial<LineItem>) =>
@@ -60,7 +62,7 @@ export function ItemPicker({
                   <SelectContent>
                     {products.map((pr) => (
                       <SelectItem key={pr.id} value={pr.id}>
-                        {pr.brand} — {pr.name} ({pr.unit})
+                        {labelOf(pr)}
                       </SelectItem>
                     ))}
                   </SelectContent>

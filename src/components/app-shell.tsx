@@ -7,6 +7,7 @@ import {
   IndianRupee,
   BookOpen,
   Boxes,
+  Settings,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -18,6 +19,7 @@ const nav = [
   { to: "/stock", label: "Stock", te: "స్టాక్", icon: Boxes },
   { to: "/products", label: "Products", te: "వస్తువులు", icon: Package },
   { to: "/reports", label: "Ledger", te: "లెక్కలు", icon: BookOpen },
+  { to: "/setup", label: "Setup", te: "సెటప్", icon: Settings },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
