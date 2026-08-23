@@ -105,6 +105,30 @@ function Dashboard() {
         />
       </div>
 
+      <Button
+        variant="secondary"
+        size="lg"
+        className="h-auto w-full gap-2 py-3 text-base"
+        disabled={db.loading || busy}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            const { downloadDailySummary } = await import("@/lib/daily-summary");
+            await downloadDailySummary(db, today);
+            toast.success("Daily summary downloaded");
+          } catch (e) {
+            console.error(e);
+            toast.error("Could not make the summary. Please try again.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <FileDown className="h-5 w-5" />
+        {busy ? "Preparing…" : "Download today's summary (PDF)"}
+      </Button>
+
+
       {/* Numbers */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Today's sales" value={rupees(todaySales)} sub={`${todayDeliveries.length} deliveries`} />
