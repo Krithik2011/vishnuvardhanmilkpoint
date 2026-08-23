@@ -14,13 +14,214 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          name: string
+          note: string | null
+          phone: string
+        }
+        Insert: {
+          address?: string
+          created_at?: string
+          id?: string
+          name: string
+          note?: string | null
+          phone?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          name?: string
+          note?: string | null
+          phone?: string
+        }
+        Relationships: []
+      }
+      deliveries: {
+        Row: {
+          created_at: string
+          customer_id: string
+          date: string
+          id: string
+          items: Json
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          date?: string
+          id?: string
+          items?: Json
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          date?: string
+          id?: string
+          items?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_id: string
+          date: string
+          id: string
+          mode: string
+          note: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          customer_id: string
+          date?: string
+          id?: string
+          mode?: string
+          note?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_id?: string
+          date?: string
+          id?: string
+          mode?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          buy_price: number
+          created_at: string
+          id: string
+          low_stock_at: number
+          name: string
+          sale_price: number
+          stock: number
+          supplier_id: string
+          unit: string
+        }
+        Insert: {
+          buy_price?: number
+          created_at?: string
+          id?: string
+          low_stock_at?: number
+          name: string
+          sale_price?: number
+          stock?: number
+          supplier_id: string
+          unit?: string
+        }
+        Update: {
+          buy_price?: number
+          created_at?: string
+          id?: string
+          low_stock_at?: number
+          name?: string
+          sale_price?: number
+          stock?: number
+          supplier_id?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_entries: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          items: Json
+          supplier: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          items?: Json
+          supplier: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          items?: Json
+          supplier?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          note: string | null
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          note?: string | null
+          phone?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          note?: string | null
+          phone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_stock_delta: {
+        Args: { p_items: Json; p_sign: number }
+        Returns: undefined
+      }
+      record_delivery: {
+        Args: { p_customer: string; p_date: string; p_items: Json }
+        Returns: string
+      }
+      record_stock_entry: {
+        Args: { p_date: string; p_items: Json; p_supplier: string }
+        Returns: string
+      }
+      remove_delivery: { Args: { p_id: string }; Returns: undefined }
+      remove_stock_entry: { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
