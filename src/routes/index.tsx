@@ -1,5 +1,7 @@
+import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, IndianRupee, Package, Truck, UserPlus, Boxes } from "lucide-react";
+import { toast } from "sonner";
+import { AlertTriangle, IndianRupee, Package, Truck, UserPlus, Boxes, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +44,7 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const db = useDB();
   const today = todayISO();
+  const [busy, setBusy] = React.useState(false);
 
   const todayDeliveries = db.deliveries.filter((d) => d.date === today);
   const todaySales = todayDeliveries.reduce((s, d) => s + deliveryTotal(d), 0);
@@ -104,6 +107,30 @@ function Dashboard() {
           }
         />
       </div>
+
+      <Button
+        variant="secondary"
+        size="lg"
+        className="h-auto w-full gap-2 py-3 text-base"
+        disabled={db.loading || busy}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            const { downloadDailySummary } = await import("@/lib/daily-summary");
+            await downloadDailySummary(db, today);
+            toast.success("Daily summary downloaded");
+          } catch (e) {
+            console.error(e);
+            toast.error("Could not make the summary. Please try again.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <FileDown className="h-5 w-5" />
+        {busy ? "Preparing…" : "Download today's summary (PDF)"}
+      </Button>
+
 
       {/* Numbers */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -9,7 +9,8 @@ import {
   Boxes,
   Settings,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { startLiveData } from "@/lib/store";
 
 const nav = [
   { to: "/", label: "Home", te: "హోమ్", icon: LayoutDashboard },
@@ -23,6 +24,10 @@ const nav = [
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    startLiveData();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-card/95 backdrop-blur">
