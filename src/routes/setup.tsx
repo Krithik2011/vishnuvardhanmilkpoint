@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import {
   addSupplier,
   deleteSupplier,
-  resetDemoData,
+  refresh,
   rupees,
   updateSupplier,
   useDB,
@@ -218,21 +218,22 @@ function SetupPage() {
       </div>
 
       <div className="mt-8 rounded-2xl border border-dashed border-border p-4">
-        <p className="text-sm font-semibold">Demo data</p>
+        <p className="text-sm font-semibold">Shared data</p>
         <p className="mb-3 text-xs text-muted-foreground">
-          Everything is saved on this device. You can start again with the sample data any time.
+          Everything is saved in the shared cloud account, so all staff see the same data.
         </p>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => {
-            resetDemoData();
-            toast.success("Sample data restored");
+          onClick={async () => {
+            await refresh();
+            toast.success("Data refreshed");
           }}
         >
-          <RotateCcw className="mr-1 h-4 w-4" /> Reset to sample data
+          <RotateCcw className="mr-1 h-4 w-4" /> Refresh data
         </Button>
       </div>
+
     </div>
   );
 }
