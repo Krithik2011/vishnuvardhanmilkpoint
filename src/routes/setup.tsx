@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import {
   addSupplier,
   deleteSupplier,
-  resetDemoData,
+  refresh,
   rupees,
   updateSupplier,
   useDB,
