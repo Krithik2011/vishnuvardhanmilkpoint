@@ -101,7 +101,7 @@ export async function downloadDailySummary(db: DB, date: string) {
     body: balances.length
       ? balances.map((b) => [b.c.name, b.c.phone, money(b.bal)])
       : [["Everyone has paid in full", "", ""]],
-    foot: balances.length ? [["Total", "", money(outstanding)]] : undefined,
+    ...(balances.length ? { foot: [["Total", "", money(outstanding)]] } : {}),
     theme: "striped",
     styles: { fontSize: 10, cellPadding: 6 },
     headStyles: { fillColor: [30, 90, 60], textColor: 255 },
