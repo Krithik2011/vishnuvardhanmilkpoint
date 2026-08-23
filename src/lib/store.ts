@@ -1,4 +1,6 @@
 import * as React from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Supplier = {
   id: string;
@@ -11,7 +13,7 @@ export type Product = {
   id: string;
   supplierId: string;
   name: string;
-  unit: string; // e.g. "500 ml packet", "1 L packet", "1 kg"
+  unit: string;
   buyPrice: number;
   salePrice: number;
   stock: number;
@@ -30,14 +32,14 @@ export type StockEntry = {
   id: string;
   date: string; // yyyy-mm-dd
   supplier: string;
-  items: { productId: string; qty: number; cost: number }[]; // cost = per unit purchase cost
+  items: { productId: string; qty: number; cost: number }[];
 };
 
 export type Delivery = {
   id: string;
   date: string;
   customerId: string;
-  items: { productId: string; qty: number; price: number }[]; // price = per unit sale price
+  items: { productId: string; qty: number; price: number }[];
 };
 
 export type Payment = {
@@ -56,137 +58,12 @@ export type DB = {
   stockEntries: StockEntry[];
   deliveries: Delivery[];
   payments: Payment[];
+  loading: boolean;
 };
-
-const KEY = "dairy-app-v1";
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export const todayISO = () => new Date().toISOString().slice(0, 10);
-const daysAgo = (n: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-};
-
-function seed(): DB {
-  const sup = (name: string, phone: string, note?: string): Supplier => ({
-    id: uid(),
-    name,
-    phone,
-    note,
-  });
-
-  const suppliers: Supplier[] = [
-    sup("Amul", "1800 258 3333", "Depot pickup at 5:00 AM"),
-    sup("Vijaya (Telangana)", "040 2331 2233", "Govt. dairy agency"),
-    sup("Heritage", "98480 55667", "Delivered to shop"),
-    sup("Dodla", "90300 12345"),
-  ];
-
-  const p = (
-    supplierId: string,
-    name: string,
-    unit: string,
-    buyPrice: number,
-    salePrice: number,
-    stock: number,
-    lowStockAt: number,
-  ): Product => ({ id: uid(), supplierId, name, unit, buyPrice, salePrice, stock, lowStockAt });
-
-  const products: Product[] = [
-    p(suppliers[0]!.id, "Taaza Toned Milk", "500 ml packet", 25, 28, 120, 40),
-    p(suppliers[0]!.id, "Gold Full Cream Milk", "500 ml packet", 32, 35, 18, 30),
-    p(suppliers[0]!.id, "Butter", "100 g", 54, 60, 24, 10),
-    p(suppliers[1]!.id, "Toned Milk", "500 ml packet", 23, 26, 200, 50),
-    p(suppliers[1]!.id, "Curd", "500 g cup", 28, 32, 12, 20),
-    p(suppliers[2]!.id, "Cow Milk", "500 ml packet", 26, 30, 90, 40),
-    p(suppliers[2]!.id, "Paneer", "200 g", 88, 100, 8, 6),
-    p(suppliers[3]!.id, "Buttermilk", "200 ml pouch", 8, 10, 150, 50),
-  ];
-
-  const c = (name: string, phone: string, address: string, note?: string): Customer => ({
-    id: uid(),
-    name,
-    phone,
-    address,
-    note,
-  });
-
-  const customers: Customer[] = [
-    c("Ramesh Kirana Store", "98490 11223", "Shop 4, Ameerpet Main Road", "Morning route"),
-    c("Lakshmi Tiffin Centre", "99590 44556", "Beside Bus Stand, Kukatpally"),
-    c("Srinivas Reddy (Home)", "90000 77889", "Flat 302, Sai Enclave, Miyapur"),
-    c("Sai Provisions", "97010 33445", "Nizampet X Roads"),
-    c("Anitha Hotel", "88860 99001", "Old Bowenpally Market"),
-  ];
-
-  const stockEntries: StockEntry[] = [
-    {
-      id: uid(),
-      date: daysAgo(2),
-      supplier: "Amul Depot",
-      items: [
-        { productId: products[0]!.id, qty: 100, cost: 25 },
-        { productId: products[1]!.id, qty: 40, cost: 32 },
-      ],
-    },
-    {
-      id: uid(),
-      date: daysAgo(1),
-      supplier: "Vijaya Dairy Agency",
-      items: [
-        { productId: products[3]!.id, qty: 150, cost: 23 },
-        { productId: products[4]!.id, qty: 30, cost: 28 },
-      ],
-    },
-    {
-      id: uid(),
-      date: todayISO(),
-      supplier: "Heritage Distributor",
-      items: [
-        { productId: products[5]!.id, qty: 80, cost: 26 },
-        { productId: products[6]!.id, qty: 10, cost: 88 },
-      ],
-    },
-  ];
-
-  const d = (date: string, customerId: string, items: Delivery["items"]): Delivery => ({
-    id: uid(),
-    date,
-    customerId,
-    items,
-  });
-
-  const deliveries: Delivery[] = [
-    d(daysAgo(3), customers[0]!.id, [
-      { productId: products[0]!.id, qty: 30, price: 28 },
-      { productId: products[3]!.id, qty: 20, price: 26 },
-    ]),
-    d(daysAgo(2), customers[1]!.id, [
-      { productId: products[4]!.id, qty: 10, price: 32 },
-      { productId: products[7]!.id, qty: 25, price: 10 },
-    ]),
-    d(daysAgo(1), customers[2]!.id, [{ productId: products[5]!.id, qty: 6, price: 30 }]),
-    d(daysAgo(1), customers[3]!.id, [
-      { productId: products[0]!.id, qty: 40, price: 28 },
-      { productId: products[2]!.id, qty: 5, price: 60 },
-    ]),
-    d(todayISO(), customers[0]!.id, [{ productId: products[0]!.id, qty: 25, price: 28 }]),
-    d(todayISO(), customers[4]!.id, [
-      { productId: products[3]!.id, qty: 30, price: 26 },
-      { productId: products[6]!.id, qty: 2, price: 100 },
-    ]),
-  ];
-
-  const payments: Payment[] = [
-    { id: uid(), date: daysAgo(2), customerId: customers[0]!.id, amount: 1000, mode: "UPI" },
-    { id: uid(), date: daysAgo(1), customerId: customers[1]!.id, amount: 570, mode: "Cash" },
-    { id: uid(), date: todayISO(), customerId: customers[3]!.id, amount: 800, mode: "Cash" },
-  ];
-
-  return { suppliers, products, customers, stockEntries, deliveries, payments };
-}
 
 const EMPTY_DB: DB = {
   suppliers: [],
@@ -195,39 +72,123 @@ const EMPTY_DB: DB = {
   stockEntries: [],
   deliveries: [],
   payments: [],
+  loading: true,
 };
 
-let db: DB | null = null;
+/* ---------- live shared state (Lovable Cloud) ---------- */
+
+let db: DB = EMPTY_DB;
 const listeners = new Set<() => void>();
 
-function load(): DB {
-  if (db) return db;
-  if (typeof window === "undefined") return EMPTY_DB;
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    db = raw ? (JSON.parse(raw) as DB) : seed();
-  } catch {
-    db = seed();
-  }
-  return db!;
-}
-
-function persist() {
-  if (typeof window !== "undefined" && db) {
-    window.localStorage.setItem(KEY, JSON.stringify(db));
-  }
+function emit() {
   listeners.forEach((l) => l());
 }
 
-export function update(fn: (d: DB) => void) {
-  const cur = load();
-  fn(cur);
-  persist();
+const num = (v: unknown) => Number(v ?? 0);
+
+export async function refresh(): Promise<void> {
+  const [sup, prod, cust, stock, del, pay] = await Promise.all([
+    supabase.from("suppliers").select("*").order("name"),
+    supabase.from("products").select("*").order("created_at"),
+    supabase.from("customers").select("*").order("name"),
+    supabase.from("stock_entries").select("*").order("date", { ascending: false }),
+    supabase.from("deliveries").select("*").order("date", { ascending: false }),
+    supabase.from("payments").select("*").order("date", { ascending: false }),
+  ]);
+
+  const firstError =
+    sup.error || prod.error || cust.error || stock.error || del.error || pay.error;
+  if (firstError) {
+    db = { ...db, loading: false };
+    emit();
+    throw firstError;
+  }
+
+  db = {
+    loading: false,
+    suppliers: (sup.data ?? []).map((s) => ({
+      id: s.id,
+      name: s.name,
+      phone: s.phone ?? "",
+      note: s.note ?? undefined,
+    })),
+    products: (prod.data ?? []).map((p) => ({
+      id: p.id,
+      supplierId: p.supplier_id,
+      name: p.name,
+      unit: p.unit ?? "",
+      buyPrice: num(p.buy_price),
+      salePrice: num(p.sale_price),
+      stock: num(p.stock),
+      lowStockAt: num(p.low_stock_at),
+    })),
+    customers: (cust.data ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      phone: c.phone ?? "",
+      address: c.address ?? "",
+      note: c.note ?? undefined,
+    })),
+    stockEntries: (stock.data ?? []).map((e) => ({
+      id: e.id,
+      date: e.date,
+      supplier: e.supplier,
+      items: (e.items as StockEntry["items"]) ?? [],
+    })),
+    deliveries: (del.data ?? []).map((e) => ({
+      id: e.id,
+      date: e.date,
+      customerId: e.customer_id,
+      items: (e.items as Delivery["items"]) ?? [],
+    })),
+    payments: (pay.data ?? []).map((p) => ({
+      id: p.id,
+      date: p.date,
+      customerId: p.customer_id,
+      amount: num(p.amount),
+      mode: (p.mode as Payment["mode"]) ?? "Cash",
+      note: p.note ?? undefined,
+    })),
+  };
+  emit();
 }
 
-export function resetDemoData() {
-  db = seed();
-  persist();
+let started = false;
+let reloadTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleRefresh() {
+  if (reloadTimer) clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(() => {
+    void refresh().catch(() => {});
+  }, 150);
+}
+
+/** Loads the shared data and keeps it live for every logged-in employee. */
+export function startLiveData() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+
+  void refresh().catch((e: unknown) => {
+    console.error(e);
+    toast.error("Could not load data. Check your internet and refresh.");
+  });
+
+  const channel = supabase.channel("dairy-live");
+  for (const table of [
+    "suppliers",
+    "products",
+    "customers",
+    "stock_entries",
+    "deliveries",
+    "payments",
+  ]) {
+    channel.on("postgres_changes", { event: "*", schema: "public", table }, scheduleRefresh);
+  }
+  channel.subscribe();
+
+  const onFocus = () => scheduleRefresh();
+  window.addEventListener("focus", onFocus);
+  document.addEventListener("visibilitychange", onFocus);
 }
 
 export function useDB(): DB {
@@ -237,7 +198,7 @@ export function useDB(): DB {
   }, []);
   return React.useSyncExternalStore(
     subscribe,
-    () => load(),
+    () => db,
     () => EMPTY_DB,
   );
 }
@@ -252,11 +213,9 @@ export const formatDate = (iso: string) => {
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-export const deliveryTotal = (dl: Delivery) =>
-  dl.items.reduce((s, i) => s + i.qty * i.price, 0);
+export const deliveryTotal = (dl: Delivery) => dl.items.reduce((s, i) => s + i.qty * i.price, 0);
 
-export const stockEntryTotal = (s: StockEntry) =>
-  s.items.reduce((sum, i) => sum + i.qty * i.cost, 0);
+export const stockEntryTotal = (s: StockEntry) => s.items.reduce((sum, i) => sum + i.qty * i.cost, 0);
 
 export function balanceOf(d: DB, customerId: string) {
   const billed = d.deliveries
@@ -284,91 +243,133 @@ export function customerName(d: DB, id: string) {
 
 /* ---------- mutations ---------- */
 
+function fail(e: unknown, fallback: string) {
+  const msg = (e as { message?: string } | null)?.message ?? fallback;
+  console.error(e);
+  toast.error(msg.replace(/^.*?:\s*/, "") || fallback);
+}
+
+async function run(fn: () => Promise<{ error: unknown }>, fallback: string) {
+  try {
+    const { error } = await fn();
+    if (error) {
+      fail(error, fallback);
+      return false;
+    }
+    await refresh();
+    return true;
+  } catch (e) {
+    fail(e, fallback);
+    return false;
+  }
+}
+
 export const addCustomer = (c: Omit<Customer, "id">) =>
-  update((d) => void d.customers.unshift({ ...c, id: uid() }));
+  run(
+    async () =>
+      supabase.from("customers").insert({
+        name: c.name,
+        phone: c.phone,
+        address: c.address,
+        note: c.note ?? null,
+      }),
+    "Could not save the customer",
+  );
 
 export const updateCustomer = (id: string, c: Omit<Customer, "id">) =>
-  update((d) => {
-    const i = d.customers.findIndex((x) => x.id === id);
-    if (i >= 0) d.customers[i] = { ...c, id };
-  });
+  run(
+    async () =>
+      supabase
+        .from("customers")
+        .update({ name: c.name, phone: c.phone, address: c.address, note: c.note ?? null })
+        .eq("id", id),
+    "Could not update the customer",
+  );
 
 export const deleteCustomer = (id: string) =>
-  update((d) => {
-    d.customers = d.customers.filter((c) => c.id !== id);
-    d.deliveries = d.deliveries.filter((x) => x.customerId !== id);
-    d.payments = d.payments.filter((x) => x.customerId !== id);
-  });
+  run(async () => supabase.from("customers").delete().eq("id", id), "Could not delete the customer");
 
 export const addSupplier = (s: Omit<Supplier, "id">) =>
-  update((d) => void d.suppliers.push({ ...s, id: uid() }));
+  run(
+    async () => supabase.from("suppliers").insert({ name: s.name, phone: s.phone, note: s.note ?? null }),
+    "Could not save the company",
+  );
 
 export const updateSupplier = (id: string, s: Omit<Supplier, "id">) =>
-  update((d) => {
-    const i = d.suppliers.findIndex((x) => x.id === id);
-    if (i >= 0) d.suppliers[i] = { ...s, id };
-  });
+  run(
+    async () =>
+      supabase
+        .from("suppliers")
+        .update({ name: s.name, phone: s.phone, note: s.note ?? null })
+        .eq("id", id),
+    "Could not update the company",
+  );
 
 export const deleteSupplier = (id: string) =>
-  update((d) => {
-    d.suppliers = d.suppliers.filter((s) => s.id !== id);
-    d.products = d.products.filter((p) => p.supplierId !== id);
-  });
+  run(async () => supabase.from("suppliers").delete().eq("id", id), "Could not delete the company");
+
+const productRow = (p: Omit<Product, "id">) => ({
+  supplier_id: p.supplierId,
+  name: p.name,
+  unit: p.unit,
+  buy_price: p.buyPrice,
+  sale_price: p.salePrice,
+  stock: Math.max(0, p.stock),
+  low_stock_at: p.lowStockAt,
+});
 
 export const addProduct = (p: Omit<Product, "id">) =>
-  update((d) => void d.products.unshift({ ...p, id: uid() }));
+  run(async () => supabase.from("products").insert(productRow(p)), "Could not save the product");
 
 export const updateProduct = (id: string, p: Omit<Product, "id">) =>
-  update((d) => {
-    const i = d.products.findIndex((x) => x.id === id);
-    if (i >= 0) d.products[i] = { ...p, id };
-  });
+  run(
+    async () => supabase.from("products").update(productRow(p)).eq("id", id),
+    "Could not update the product",
+  );
 
 export const deleteProduct = (id: string) =>
-  update((d) => void (d.products = d.products.filter((p) => p.id !== id)));
+  run(async () => supabase.from("products").delete().eq("id", id), "Could not delete the product");
 
 export const addStockEntry = (e: Omit<StockEntry, "id">) =>
-  update((d) => {
-    d.stockEntries.unshift({ ...e, id: uid() });
-    e.items.forEach((it) => {
-      const p = d.products.find((x) => x.id === it.productId);
-      if (p) p.stock += it.qty;
-    });
-  });
+  run(
+    async () =>
+      supabase.rpc("record_stock_entry", {
+        p_date: e.date,
+        p_supplier: e.supplier,
+        p_items: e.items,
+      }),
+    "Could not save the stock entry",
+  );
 
 export const deleteStockEntry = (id: string) =>
-  update((d) => {
-    const e = d.stockEntries.find((x) => x.id === id);
-    if (!e) return;
-    e.items.forEach((it) => {
-      const p = d.products.find((x) => x.id === it.productId);
-      if (p) p.stock -= it.qty;
-    });
-    d.stockEntries = d.stockEntries.filter((x) => x.id !== id);
-  });
+  run(async () => supabase.rpc("remove_stock_entry", { p_id: id }), "Could not remove the stock entry");
 
 export const addDelivery = (e: Omit<Delivery, "id">) =>
-  update((d) => {
-    d.deliveries.unshift({ ...e, id: uid() });
-    e.items.forEach((it) => {
-      const p = d.products.find((x) => x.id === it.productId);
-      if (p) p.stock -= it.qty;
-    });
-  });
+  run(
+    async () =>
+      supabase.rpc("record_delivery", {
+        p_date: e.date,
+        p_customer: e.customerId,
+        p_items: e.items,
+      }),
+    "Could not save the delivery",
+  );
 
 export const deleteDelivery = (id: string) =>
-  update((d) => {
-    const e = d.deliveries.find((x) => x.id === id);
-    if (!e) return;
-    e.items.forEach((it) => {
-      const p = d.products.find((x) => x.id === it.productId);
-      if (p) p.stock += it.qty;
-    });
-    d.deliveries = d.deliveries.filter((x) => x.id !== id);
-  });
+  run(async () => supabase.rpc("remove_delivery", { p_id: id }), "Could not remove the delivery");
 
 export const addPayment = (e: Omit<Payment, "id">) =>
-  update((d) => void d.payments.unshift({ ...e, id: uid() }));
+  run(
+    async () =>
+      supabase.from("payments").insert({
+        date: e.date,
+        customer_id: e.customerId,
+        amount: e.amount,
+        mode: e.mode,
+        note: e.note ?? null,
+      }),
+    "Could not save the payment",
+  );
 
 export const deletePayment = (id: string) =>
-  update((d) => void (d.payments = d.payments.filter((x) => x.id !== id)));
+  run(async () => supabase.from("payments").delete().eq("id", id), "Could not delete the payment");
