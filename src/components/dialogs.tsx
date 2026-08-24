@@ -43,12 +43,17 @@ export function AddCustomerDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const [f, setF] = React.useState({ name: "", phone: "", address: "", note: "" });
 
-  const save = () => {
+  const [saving, setSaving] = React.useState(false);
+
+  const save = async () => {
     if (!f.name.trim()) {
       toast.error("Please enter the customer name");
       return;
     }
-    addCustomer(f);
+    setSaving(true);
+    const ok = await addCustomer(f);
+    setSaving(false);
+    if (!ok) return;
     toast.success(`${f.name} added`);
     setF({ name: "", phone: "", address: "", note: "" });
     setOpen(false);
