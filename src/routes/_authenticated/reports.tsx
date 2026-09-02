@@ -22,7 +22,7 @@ import {
   useDB,
 } from "@/lib/store";
 
-export const Route = createFileRoute("/reports")({
+export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
       { title: "Ledger & Reports — Sri Lakshmi Dairy" },
