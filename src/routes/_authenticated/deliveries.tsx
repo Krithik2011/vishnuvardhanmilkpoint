@@ -16,7 +16,7 @@ import {
   useDB,
 } from "@/lib/store";
 
-export const Route = createFileRoute("/deliveries")({
+export const Route = createFileRoute("/_authenticated/deliveries")({
   head: () => ({
     meta: [
       { title: "Deliveries & Sales — Sri Lakshmi Dairy" },

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { balanceOf, rupees, useDB } from "@/lib/store";
 
-export const Route = createFileRoute("/customers/")({
+export const Route = createFileRoute("/_authenticated/customers/")({
   head: () => ({
     meta: [
       { title: "Customers & Balances — Sri Lakshmi Dairy" },

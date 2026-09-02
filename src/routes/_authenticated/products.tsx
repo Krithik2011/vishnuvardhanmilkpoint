@@ -33,7 +33,7 @@ import {
   type Product,
 } from "@/lib/store";
 
-export const Route = createFileRoute("/products")({
+export const Route = createFileRoute("/_authenticated/products")({
   head: () => ({
     meta: [
       { title: "Products & Prices — Sri Lakshmi Dairy" },

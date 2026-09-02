@@ -27,7 +27,7 @@ import {
   type Supplier,
 } from "@/lib/store";
 
-export const Route = createFileRoute("/setup")({
+export const Route = createFileRoute("/_authenticated/setup")({
   head: () => ({
     meta: [
       { title: "Setup — Companies & Product Catalog" },
