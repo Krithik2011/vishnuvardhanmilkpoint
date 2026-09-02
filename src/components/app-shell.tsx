@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-card/95 backdrop-blur">
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
-          <Link to="/" className="flex min-w-0 items-center gap-3">
+          <Link to="/dashboard" className="flex min-w-0 items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary text-lg text-primary-foreground">
               🥛
             </span>
@@ -59,6 +59,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </span>
           </Link>
+          <Button variant="ghost" size="sm" onClick={signOut} className="shrink-0">
+            <LogOut className="h-4 w-4" />
+            <span className="ml-1 hidden sm:inline">Sign out</span>
+          </Button>
         </div>
         <nav className="hidden overflow-x-auto border-t border-border/60 md:block">
           <div className="mx-auto flex max-w-5xl gap-1 px-3 py-2">
@@ -66,7 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                activeOptions={{ exact: n.to === "/" }}
+                activeOptions={{ exact: n.to === "/dashboard" }}
                 activeProps={{ className: "bg-primary text-primary-foreground" }}
                 inactiveProps={{ className: "text-muted-foreground hover:bg-muted" }}
                 className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors"
@@ -87,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={n.to}
               to={n.to}
-              activeOptions={{ exact: n.to === "/" }}
+              activeOptions={{ exact: n.to === "/dashboard" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
               className="flex flex-col items-center gap-1 py-2 text-[11px] font-semibold"
