@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Users,
@@ -8,12 +9,15 @@ import {
   BookOpen,
   Boxes,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { startLiveData } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const nav = [
-  { to: "/", label: "Home", te: "హోమ్", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Home", te: "హోమ్", icon: LayoutDashboard },
   { to: "/customers", label: "Customers", te: "కస్టమర్లు", icon: Users },
   { to: "/deliveries", label: "Delivery", te: "డెలివరీ", icon: Truck },
   { to: "/payments", label: "Payments", te: "చెల్లింపులు", icon: IndianRupee },
