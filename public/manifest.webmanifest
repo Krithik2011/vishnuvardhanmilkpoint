@@ -1,0 +1,16 @@
+{
+  "name": "Sri Lakshmi Dairy — Milk Book",
+  "short_name": "Dairy Book",
+  "description": "Milk distribution book: customers, deliveries, payments and stock.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7ef",
+  "theme_color": "#1f6b3b",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
