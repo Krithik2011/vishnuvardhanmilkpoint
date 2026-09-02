@@ -4,7 +4,7 @@ import { Plus, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/app-shell";
 import { ConfirmDelete } from "@/components/confirm-delete";
-import { ProductForm } from "@/routes/products";
+import { ProductForm } from "@/routes/_authenticated/products";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
