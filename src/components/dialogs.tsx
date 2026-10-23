@@ -106,8 +106,8 @@ export function AddCustomerDialog({ trigger }: { trigger: React.ReactNode }) {
           </div>
         </div>
         <DialogFooter>
-          <Button size="lg" className="w-full" onClick={save}>
-            Save customer
+          <Button size="lg" className="w-full" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : "Save customer"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -129,6 +129,7 @@ export function DeliveryDialog({
   const [cust, setCust] = React.useState(customerId ?? "");
   const [date, setDate] = React.useState(todayISO());
   const [items, setItems] = React.useState<LineItem[]>([]);
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
@@ -142,7 +143,7 @@ export function DeliveryDialog({
 
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
 
-  const save = () => {
+  const save = async () => {
     if (!cust) {
       toast.error("Please choose a customer");
       return;
@@ -152,7 +153,10 @@ export function DeliveryDialog({
       toast.error("Add at least one product");
       return;
     }
-    addDelivery({ date, customerId: cust, items: valid });
+    setSaving(true);
+    const ok = await addDelivery({ date, customerId: cust, items: valid });
+    setSaving(false);
+    if (!ok) return;
     toast.success(`Delivery saved — ${rupees(total)} added to balance`);
     setOpen(false);
   };
@@ -200,8 +204,8 @@ export function DeliveryDialog({
           />
         </div>
         <DialogFooter>
-          <Button size="lg" className="w-full" onClick={save}>
-            Save delivery — {rupees(total)}
+          <Button size="lg" className="w-full" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : `Save delivery — ${rupees(total)}`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -217,6 +221,7 @@ export function StockDialog({ trigger }: { trigger: React.ReactNode }) {
   const [supplier, setSupplier] = React.useState("");
   const [date, setDate] = React.useState(todayISO());
   const [items, setItems] = React.useState<LineItem[]>([]);
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
@@ -236,7 +241,7 @@ export function StockDialog({ trigger }: { trigger: React.ReactNode }) {
 
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
 
-  const save = () => {
+  const save = async () => {
     if (!supplier) {
       toast.error("Please choose the company / supplier");
       return;
@@ -246,11 +251,14 @@ export function StockDialog({ trigger }: { trigger: React.ReactNode }) {
       toast.error("Add at least one product");
       return;
     }
-    addStockEntry({
+    setSaving(true);
+    const ok = await addStockEntry({
       date,
       supplier,
       items: valid.map((i) => ({ productId: i.productId, qty: i.qty, cost: i.price })),
     });
+    setSaving(false);
+    if (!ok) return;
     toast.success(`Stock added from ${supplier}`);
     setOpen(false);
   };
@@ -297,8 +305,8 @@ export function StockDialog({ trigger }: { trigger: React.ReactNode }) {
           />
         </div>
         <DialogFooter>
-          <Button size="lg" className="w-full" onClick={save}>
-            Save stock — {rupees(total)}
+          <Button size="lg" className="w-full" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : `Save stock — ${rupees(total)}`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -322,6 +330,7 @@ export function PaymentDialog({
   const [amount, setAmount] = React.useState("");
   const [mode, setMode] = React.useState<"Cash" | "UPI" | "Bank">("Cash");
   const [note, setNote] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
@@ -336,7 +345,7 @@ export function PaymentDialog({
   const due = cust ? balanceOf(db, cust) : 0;
   const amt = Number(amount) || 0;
 
-  const save = () => {
+  const save = async () => {
     if (!cust) {
       toast.error("Please choose a customer");
       return;
@@ -345,7 +354,16 @@ export function PaymentDialog({
       toast.error("Enter the amount received");
       return;
     }
-    addPayment({ date, customerId: cust, amount: amt, mode, ...(note ? { note } : {}) });
+    setSaving(true);
+    const ok = await addPayment({
+      date,
+      customerId: cust,
+      amount: amt,
+      mode,
+      ...(note ? { note } : {}),
+    });
+    setSaving(false);
+    if (!ok) return;
     const left = due - amt;
     toast.success(
       left > 0
@@ -461,8 +479,10 @@ export function PaymentDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button size="lg" className="w-full" onClick={save}>
-            Save payment {amt > 0 ? `— ${rupees(amt)}` : ""}
+          <Button size="lg" className="w-full" onClick={save} disabled={saving}>
+            {saving
+              ? "Saving…"
+              : `Save payment ${amt > 0 ? `— ${rupees(amt)}` : ""}`}
           </Button>
         </DialogFooter>
       </DialogContent>
