@@ -12,7 +12,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
-import { startLiveData } from "@/lib/store";
+import { clearDataCache, startLiveData } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -38,6 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
+    clearDataCache();
     await supabase.auth.signOut();
     void navigate({ to: "/auth", replace: true });
   };

@@ -75,6 +75,39 @@ const EMPTY_DB: DB = {
   loading: true,
 };
 
+/* ---------- offline cache (last known data on this device) ---------- */
+
+const CACHE_KEY = "dairy-data-cache-v1";
+
+function loadCache(): Omit<DB, "loading"> | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Omit<DB, "loading">;
+    if (!parsed || !Array.isArray(parsed.customers)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveCache(d: DB) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ...d, loading: undefined }));
+  } catch {
+    // storage full or unavailable — cache is best-effort
+  }
+}
+
+/** Removes cached business data from this device (used on sign-out). */
+export function clearDataCache() {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 /* ---------- live shared state (Lovable Cloud) ---------- */
 
 let db: DB = EMPTY_DB;
@@ -99,6 +132,13 @@ export async function refresh(): Promise<void> {
   const firstError =
     sup.error || prod.error || cust.error || stock.error || del.error || pay.error;
   if (firstError) {
+    const cached = loadCache();
+    if (cached) {
+      // Offline or network hiccup: show the last known data instead of empty lists.
+      db = { ...cached, loading: false };
+      emit();
+      return;
+    }
     db = { ...db, loading: false };
     emit();
     throw firstError;
@@ -150,6 +190,7 @@ export async function refresh(): Promise<void> {
       note: p.note ?? undefined,
     })),
   };
+  saveCache(db);
   emit();
 }
 
@@ -167,6 +208,13 @@ function scheduleRefresh() {
 export function startLiveData() {
   if (started || typeof window === "undefined") return;
   started = true;
+
+  // Show the last known data immediately (e.g. when opening the app offline).
+  const cached = loadCache();
+  if (cached && db.loading) {
+    db = { ...cached, loading: false };
+    emit();
+  }
 
   void refresh().catch((e: unknown) => {
     console.error(e);
