@@ -1,0 +1,12 @@
+DROP POLICY "staff manage customers" ON public.customers;
+CREATE POLICY "staff manage customers" ON public.customers FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY "staff manage suppliers" ON public.suppliers;
+CREATE POLICY "staff manage suppliers" ON public.suppliers FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY "staff manage products" ON public.products;
+CREATE POLICY "staff manage products" ON public.products FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY "staff manage stock_entries" ON public.stock_entries;
+CREATE POLICY "staff manage stock_entries" ON public.stock_entries FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY "staff manage deliveries" ON public.deliveries;
+CREATE POLICY "staff manage deliveries" ON public.deliveries FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+DROP POLICY "staff manage payments" ON public.payments;
+CREATE POLICY "staff manage payments" ON public.payments FOR ALL TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
